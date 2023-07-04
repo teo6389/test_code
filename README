@@ -1,2 +1,5 @@
 commit
 python3.11
+sudo groupadd docker
+sudo usermod -aG docker ${USER}
+sudo usermod -a -G docker [user]
