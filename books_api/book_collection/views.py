@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from book_collection import models as model_k
-import requests
-
+import requests, json
+from django.views.decorators.csrf import csrf_exempt
 
 
 def fetch_books(keyword):
@@ -10,6 +10,10 @@ def fetch_books(keyword):
 	books_response = requests.get('https://openlibrary.org/search.json?q='+keyword)
 	books_dct = books_response.json()
 	# print(books_dct)
+	return books_dct
+
+def format_books(books_dct):
+
 
 	books_lst = []
 
@@ -215,8 +219,8 @@ def fetch_books(keyword):
 		if 'revision' in book:
 			book_init_dct_obj['revision'] = book['revision']
 
-		# print(book)
-		# print(valid_book)
+		print(book)
+		print(valid_book)
 
 		if valid_book:
 			books_lst.append(book_init_dct_obj)
@@ -229,10 +233,17 @@ def fetch_books(keyword):
 
 def fetch_books_wrap(request):
 
-	books_lst = fetch_books('spacecraft')
+	books_dct = fetch_books('spacecraft')
 
-	if books_lst:
-		books2db(books_lst)
+	if books_dct:
+
+		books_lst = format_books(books_dct)
+
+		if books_lst:
+			
+			books2db(books_lst)
+
+	return HttpResponse('books fetched')
 
 
 def books2db(books_lst):
@@ -356,10 +367,24 @@ def books2db(books_lst):
 
 def get_all_books(request):
 
+	return get_books({})
+
+def get_books(filtering):
+
 	books_dct = {}
 	books_lst = []
 
-	for book_obj in model_k.Book.objects.filter().values(
+	objs = model_k.Book.objects.filter()
+	if filtering:
+		if 'title' in filtering:
+			objs = objs.filter(title=filtering['title'])
+		if 'author_key' in filtering:
+			objs = objs.filter(author__name=filtering['author_key'])
+	
+	if not objs:
+		return JsonResponse({'status':'books not found'})
+
+	for book_obj in objs.values(
 		'id',
 		'number_of_pages',
 		'pagination',
@@ -427,40 +452,41 @@ def get_all_books(request):
 			}
 
 
-		if book_obj['publisher__name'] not in books_dct[book_obj['id']]['publishers']:
+		if book_obj['publisher__name'] and book_obj['publisher__name'] not in books_dct[book_obj['id']]['publishers']:
 			books_dct[book_obj['id']]['publishers'].append(book_obj['publisher__name'])
+			print(book_obj['publisher__name'])
 
-		if book_obj['isbn10__isbn'] not in books_dct[book_obj['id']]['isbn_10']:
+		if book_obj['isbn10__isbn'] and book_obj['isbn10__isbn'] not in books_dct[book_obj['id']]['isbn_10']:
 			books_dct[book_obj['id']]['isbn_10'].append(book_obj['isbn10__isbn'])
 
-		if book_obj['subjectplace__pname'] not in books_dct[book_obj['id']]['subject_place']:
+		if book_obj['subjectplace__pname'] and book_obj['subjectplace__pname'] not in books_dct[book_obj['id']]['subject_place']:
 			books_dct[book_obj['id']]['subject_place'].append(book_obj['subjectplace__pname'])
 
-		if book_obj['cover__cover'] not in books_dct[book_obj['id']]['covers']:
+		if book_obj['cover__cover'] and book_obj['cover__cover'] not in books_dct[book_obj['id']]['covers']:
 			books_dct[book_obj['id']]['covers'].append(book_obj['cover__cover'])
 
-		if book_obj['author__name'] not in books_dct[book_obj['id']]['authors']:
+		if book_obj['author__name'] and book_obj['author__name'] not in books_dct[book_obj['id']]['authors']:
 			books_dct[book_obj['id']]['authors'].append(book_obj['author__name'])
 
-		if book_obj['publishplace__pname'] not in books_dct[book_obj['id']]['publish_places']:
+		if book_obj['publishplace__pname'] and book_obj['publishplace__pname'] not in books_dct[book_obj['id']]['publish_places']:
 			books_dct[book_obj['id']]['publish_places'].append(book_obj['publishplace__pname'])
 
-		if book_obj['genre__name'] not in books_dct[book_obj['id']]['genres']:
+		if book_obj['genre__name'] and book_obj['genre__name'] not in books_dct[book_obj['id']]['genres']:
 			books_dct[book_obj['id']]['genres'].append(book_obj['genre__name'])
 
-		if book_obj['sourcerecord__record'] not in books_dct[book_obj['id']]['source_records']:
+		if book_obj['sourcerecord__record'] and book_obj['sourcerecord__record'] not in books_dct[book_obj['id']]['source_records']:
 			books_dct[book_obj['id']]['source_records'].append(book_obj['sourcerecord__record'])
 
-		if book_obj['lccn__number'] not in books_dct[book_obj['id']]['lccn']:
+		if book_obj['lccn__number'] and book_obj['lccn__number'] not in books_dct[book_obj['id']]['lccn']:
 			books_dct[book_obj['id']]['lccn'].append(book_obj['lccn__number'])
 
-		if book_obj['deweydecimalclass__ddclass'] not in books_dct[book_obj['id']]['dewey_decimal_class']:
+		if book_obj['deweydecimalclass__ddclass'] and book_obj['deweydecimalclass__ddclass'] not in books_dct[book_obj['id']]['dewey_decimal_class']:
 			books_dct[book_obj['id']]['dewey_decimal_class'].append(book_obj['deweydecimalclass__ddclass'])
 
-		if book_obj['oclcnumber__number'] not in books_dct[book_obj['id']]['oclc_numbers']:
+		if book_obj['oclcnumber__number'] and book_obj['oclcnumber__number'] not in books_dct[book_obj['id']]['oclc_numbers']:
 			books_dct[book_obj['id']]['oclc_numbers'].append(book_obj['oclcnumber__number'])
 
-		if book_obj['subject__name'] not in books_dct[book_obj['id']]['subjects']:
+		if book_obj['subject__name'] and book_obj['subject__name'] not in books_dct[book_obj['id']]['subjects']:
 			books_dct[book_obj['id']]['subjects'].append(book_obj['subject__name'])
 
 		if book_obj['btype__type_name'] and book_obj['btype__val']:
@@ -497,3 +523,95 @@ def get_all_books(request):
 
 
 	return JsonResponse({'books_lst':books_lst})
+
+# json.loads
+
+@csrf_exempt
+def book_create(request):
+
+	p_dct = json.loads(request.body)
+	
+	try:
+		r_status = 'Success'
+		books_lst = format_books(p_dct)
+		if books_lst:
+			books2db(books_lst)
+		else:
+			return JsonResponse({'status':'"author_key" and/or "works" missing'})
+
+	except:
+		r_status = 'Error'
+
+	return JsonResponse({'status':r_status})
+
+@csrf_exempt
+def book_retrieve(request):
+
+	p_dct = json.loads(request.body)
+
+	filters_dct = {}
+	
+	try:
+		r_status = 'Success'
+
+		if 'title' in p_dct:
+			filters_dct['title'] = p_dct['title']
+
+		if 'author_key' in p_dct:
+			filters_dct['author_key'] = p_dct['author_key']
+
+		return get_books(filters_dct)
+
+	except:
+		r_status = 'Error'
+
+	return JsonResponse({'status':r_status})
+
+@csrf_exempt
+def book_update(request):
+
+	p_dct = json.loads(request.body)
+	
+	try:
+		r_status = 'Success'
+
+		if 'title' not in p_dct:
+			return JsonResponse({'status':'"title" is mandatory'})
+
+		if 'updates' not in p_dct:
+			return JsonResponse({'status':'"updates" is mandatory'})
+
+		if 'title' not in p_dct['updates']:
+			return JsonResponse({'status':'"title update" is mandatory'})
+
+		objs = model_k.Book.objects.filter(title=p_dct['title'])
+		if not objs:
+			return JsonResponse({'status':'books not found'})
+
+		objs.update(
+			title=p_dct['updates']['title']
+		)
+	except:
+		r_status = 'Error'
+
+	return JsonResponse({'status':r_status})
+
+@csrf_exempt
+def book_delete(request):
+
+	try:
+		r_status = 'Success'
+		p_dct = json.loads(request.body)
+
+		if 'title' not in p_dct:
+			return JsonResponse({'status':'"title" is mandatory'})
+
+		objs = model_k.Book.objects.filter(title=p_dct['title'])
+		if not objs:
+			return JsonResponse({'status':'books not found'})
+
+		objs.delete()
+	except:
+		r_status = 'Error'
+
+	return JsonResponse({'status':r_status})
