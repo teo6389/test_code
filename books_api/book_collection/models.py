@@ -35,11 +35,6 @@ class Cover(models.Model):
 	cover = models.CharField(max_length=200)
 	book = models.ForeignKey('Book', on_delete=models.CASCADE)
 
-class LCClassification(models.Model):
-
-	classification = models.CharField(max_length=200)
-	book = models.ForeignKey('Book', on_delete=models.CASCADE)
-
 class Author(models.Model):
 
 	name = models.CharField(max_length=200)
@@ -80,19 +75,7 @@ class Subject(models.Model):
 	name = models.CharField(max_length=200)
 	book = models.ForeignKey('Book', on_delete=models.CASCADE)
 
-class Classification(models.Model):
-
-	type_name = models.CharField(max_length=200)
-	val = models.CharField(max_length=200)
-	book = models.ForeignKey('Book', on_delete=models.CASCADE)
-
 class Btype(models.Model):
-
-	type_name = models.CharField(max_length=200)
-	val = models.CharField(max_length=200)
-	book = models.ForeignKey('Book', on_delete=models.CASCADE)
-
-class Created(models.Model):
 
 	type_name = models.CharField(max_length=200)
 	val = models.CharField(max_length=200)
@@ -111,11 +94,6 @@ class Language(models.Model):
 	book = models.ForeignKey('Book', on_delete=models.CASCADE)
 
 class Work(models.Model):
-	type_name = models.CharField(max_length=200)# this might be repeated
-	val = models.CharField(max_length=200)
-	book = models.ForeignKey('Book', on_delete=models.CASCADE)
-
-class Identifiers(models.Model):
 	type_name = models.CharField(max_length=200)# this might be repeated
 	val = models.CharField(max_length=200)
 	book = models.ForeignKey('Book', on_delete=models.CASCADE)
