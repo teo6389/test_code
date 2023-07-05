@@ -1,6 +1,8 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from book_collection import models as model_k
 import requests
+
 
 
 def fetch_books(keyword):
@@ -266,7 +268,7 @@ def books2db(books_lst):
 
 		for subjectplace in book_dct['subjectplace']:
 			model_k.Subject.objects.get_or_create(
-				place=subjectplace,
+				pname=subjectplace,
 				book=book_obj,
 			)
 
@@ -284,7 +286,7 @@ def books2db(books_lst):
 
 		for publishPlace in book_dct['publishPlace']:
 			model_k.PublishPlace.objects.get_or_create(
-				place=publishPlace,
+				pname=publishPlace,
 				book=book_obj,
 			)
 
@@ -354,4 +356,144 @@ def books2db(books_lst):
 
 def get_all_books(request):
 
-	pass
+	books_dct = {}
+	books_lst = []
+
+	for book_obj in model_k.Book.objects.filter().values(
+		'id',
+		'number_of_pages',
+		'pagination',
+		'key',
+		'title',
+		'notes',
+		'publish_date',
+		'publish_country',
+		'by_statement',
+		'ocaid',
+		'latest_revision',
+		'revision',
+		'publisher__name',
+		'isbn10__isbn',
+		'subjectplace__pname',
+		'cover__cover',
+		'author__name',
+		'publishplace__pname',
+		'genre__name',
+		'sourcerecord__record',
+		'lccn__number',
+		'deweydecimalclass__ddclass',
+		'oclcnumber__number',
+		'subject__name',
+		'btype__type_name',
+		'btype__val',
+		'lastmodified__type_name',
+		'lastmodified__val',
+		'language__type_name',
+		'language__val',
+		'work__type_name',
+		'work__val',
+	):
+
+		if book_obj['id'] not in books_dct:
+
+			books_dct[book_obj['id']] = {
+				'publishers':[],#Publisher
+				'isbn_10':[],#ISBN10
+				'subject_place':[],#SubjectPlace
+				'covers':[],#Cover
+				'authors':[],#Author
+				'publish_places':[],#PublishPlace
+				'genres':[],#Genre
+				'source_records':[],#SourceRecord
+				'lccn':[],#LCCN
+				'dewey_decimal_class':[],#DeweyDecimalClass
+				'oclc_numbers':[],#OCLCNumber
+				'subjects':[],#Subject
+				'type':[],#Btype
+				'last_modified':[],#LastModified
+				'languages':[],#Language
+				'works':[],#Work
+				'number_of_pages':book_obj['number_of_pages'],
+				'pagination':book_obj['pagination'],
+				'key':book_obj['key'],
+				'title':book_obj['title'],
+				'notes':book_obj['notes'],
+				'publish_date':book_obj['publish_date'],
+				'publish_country':book_obj['publish_country'],
+				'by_statement':book_obj['by_statement'],
+				'ocaid':book_obj['ocaid'],
+				'latest_revision':book_obj['latest_revision'],
+				'revision':book_obj['revision'],
+			}
+
+
+		if book_obj['publisher__name'] not in books_dct[book_obj['id']]['publishers']:
+			books_dct[book_obj['id']]['publishers'].append(book_obj['publisher__name'])
+
+		if book_obj['isbn10__isbn'] not in books_dct[book_obj['id']]['isbn_10']:
+			books_dct[book_obj['id']]['isbn_10'].append(book_obj['isbn10__isbn'])
+
+		if book_obj['subjectplace__pname'] not in books_dct[book_obj['id']]['subject_place']:
+			books_dct[book_obj['id']]['subject_place'].append(book_obj['subjectplace__pname'])
+
+		if book_obj['cover__cover'] not in books_dct[book_obj['id']]['covers']:
+			books_dct[book_obj['id']]['covers'].append(book_obj['cover__cover'])
+
+		if book_obj['author__name'] not in books_dct[book_obj['id']]['authors']:
+			books_dct[book_obj['id']]['authors'].append(book_obj['author__name'])
+
+		if book_obj['publishplace__pname'] not in books_dct[book_obj['id']]['publish_places']:
+			books_dct[book_obj['id']]['publish_places'].append(book_obj['publishplace__pname'])
+
+		if book_obj['genre__name'] not in books_dct[book_obj['id']]['genres']:
+			books_dct[book_obj['id']]['genres'].append(book_obj['genre__name'])
+
+		if book_obj['sourcerecord__record'] not in books_dct[book_obj['id']]['source_records']:
+			books_dct[book_obj['id']]['source_records'].append(book_obj['sourcerecord__record'])
+
+		if book_obj['lccn__number'] not in books_dct[book_obj['id']]['lccn']:
+			books_dct[book_obj['id']]['lccn'].append(book_obj['lccn__number'])
+
+		if book_obj['deweydecimalclass__ddclass'] not in books_dct[book_obj['id']]['dewey_decimal_class']:
+			books_dct[book_obj['id']]['dewey_decimal_class'].append(book_obj['deweydecimalclass__ddclass'])
+
+		if book_obj['oclcnumber__number'] not in books_dct[book_obj['id']]['oclc_numbers']:
+			books_dct[book_obj['id']]['oclc_numbers'].append(book_obj['oclcnumber__number'])
+
+		if book_obj['subject__name'] not in books_dct[book_obj['id']]['subjects']:
+			books_dct[book_obj['id']]['subjects'].append(book_obj['subject__name'])
+
+		if book_obj['btype__type_name'] and book_obj['btype__val']:
+			b_type_dct = {book_obj['btype__type_name']:book_obj['btype__val']}
+			if b_type_dct not in books_dct[book_obj['id']]['type']:
+				books_dct[book_obj['id']]['type'].append(b_type_dct)
+
+		if book_obj['lastmodified__type_name'] and book_obj['lastmodified__val']:
+			lastmodified_dct = {
+				'type':book_obj['lastmodified__type_name'],
+				'value':book_obj['lastmodified__val'],
+			}
+			if lastmodified_dct not in books_dct[book_obj['id']]['last_modified']:
+				books_dct[book_obj['id']]['last_modified'].append(lastmodified_dct)
+		
+		if book_obj['language__type_name'] and book_obj['language__val']:
+			language_dct = {book_obj['language__type_name']:book_obj['language__val']}
+			if language_dct not in books_dct[book_obj['id']]['languages']:
+				books_dct[book_obj['id']]['languages'].append(language_dct)
+		
+		if book_obj['work__type_name'] and book_obj['work__val']:
+			work_dct = {book_obj['work__type_name']:book_obj['work__val']}
+			if work_dct not in books_dct[book_obj['id']]['works']:
+				books_dct[book_obj['id']]['works'].append(work_dct)
+
+	for book_id, book_dct in books_dct.items():
+		clean_book_dct = {}
+		for key, val in book_dct.items():
+			if val:
+				clean_book_dct[key] = val
+
+
+		books_lst.append(clean_book_dct)
+
+
+	return JsonResponse({'books_lst':books_lst})

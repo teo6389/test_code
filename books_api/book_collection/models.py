@@ -27,7 +27,7 @@ class ISBN10(models.Model):
 
 class SubjectPlace(models.Model):
 
-	place = models.CharField(max_length=200)
+	pname = models.CharField(max_length=200)
 	book = models.ForeignKey('Book', on_delete=models.CASCADE)
 
 class Cover(models.Model):
@@ -42,7 +42,7 @@ class Author(models.Model):
 
 class PublishPlace(models.Model):
 
-	place = models.CharField(max_length=200)
+	pname = models.CharField(max_length=200)
 	book = models.ForeignKey('Book', on_delete=models.CASCADE)
 
 class Genre(models.Model):
