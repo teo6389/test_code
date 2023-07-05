@@ -4,3 +4,5 @@ sudo groupadd docker
 sudo usermod -aG docker ${USER}
 sudo usermod -a -G docker [user]
 docker-compose up -d --build <- runs requirments and sets up containers
+sudo apt install python3-pip
+pip install -r requirements.txt
