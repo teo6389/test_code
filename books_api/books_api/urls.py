@@ -17,9 +17,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import include
+# from router import router
+from rest_framework.authtoken import views
+from book_collection import views as b_views
+from rest_framework import routers
+
+router = routers.DefaultRouter()
+router.register(r'book', b_views.bookviewsets)
 
 urlpatterns = [
+    path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('books/', include('book_collection.urls')),
     path('api-auth/', include('rest_framework.urls')),
+    # path('api/', include(router.urls)),
+    # path('api-token-auth/', views.obtain_auth_token, name='api-token-auth'),
 ]

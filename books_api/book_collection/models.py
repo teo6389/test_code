@@ -15,13 +15,13 @@ class UserExtend(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def create_user_extend(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)
+        UserExtend.objects.create(user=instance)
 
 @receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+def save_user_extend(sender, instance, **kwargs):
+    instance.userextend.save()
 
 # Create your models here.
 class Book(models.Model):

@@ -3,6 +3,9 @@ from django.http import JsonResponse, HttpResponse
 from book_collection import models as model_k
 import requests, json
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import viewsets
+from rest_framework import permissions
+from .serializers import BookSerializer
 
 
 def fetch_books(keyword):
@@ -219,9 +222,6 @@ def format_books(books_dct):
 		if 'revision' in book:
 			book_init_dct_obj['revision'] = book['revision']
 
-		print(book)
-		print(valid_book)
-
 		if valid_book:
 			books_lst.append(book_init_dct_obj)
 		else:
@@ -368,6 +368,18 @@ def books2db(books_lst):
 def get_all_books(request):
 
 	return get_books({})
+
+def get_all_books_auth(request):
+
+	return get_books({})
+
+class bookviewsets(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = model_k.Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 def get_books(filtering):
 
