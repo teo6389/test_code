@@ -1,8 +1,42 @@
-commit
-python3.11
+Python 3.11 was used
+Django was used as ORM
+
+Unfortuanately I didn’t have the time to study the “Django Rest Framework” which is an out of the box solution for restful projects. As a result the code written is from scratch.
+
+In order to run the project you must create a python virtual environment and install the packages located in the requirements file.
+
+The ORM models are located in /book_collection/models.py
+
+The model that stores the favorite books for each user is created but has no functionality
+
+A unit test example file is included in the project
+
+The application is dockerised, the required files for composing are included, when running the app from docker postgres is inited and must be set in the setting.py
+
+After that you may run the django testserver for the code to be executed
+$ ./venv/bin/python ./manage.py runserver
+
+after activating the server you may use the post_json.py(post data are included in this file) to make the following test requests
+
+1) In order to retrieve all books you make a post request to the following url
+http://127.0.0.1:8000/books/book_retrieve/
+
+2) In order to create a book make a post request to the following url
+http://127.0.0.1:8000/books/book_retrieve/
+
+3) In order to delete a book make a post request to the following url
+http://127.0.0.1:8000/books/book_delete/
+
+4) In order to update a book make a post request to the following url
+http://127.0.0.1:8000/books/book_update/
+
+5) In order to retrieve a book using a filter(author_key or title), make a post request to the following url.  post data are included in  post_json.py
+http://127.0.0.1:8000/books/book_retrieve/
+
+6) In order to fetch books from openlibrary you make a get request to the following url
+http://127.0.0.1:8000/books/fetch_books_wrap/
+
+*when using docker(on unix environment) you may need to run the following commands
 sudo groupadd docker
 sudo usermod -aG docker ${USER}
 sudo usermod -a -G docker [user]
-docker-compose up -d --build <- runs requirments and sets up containers
-sudo apt install python3-pip
-pip install -r requirements.txt

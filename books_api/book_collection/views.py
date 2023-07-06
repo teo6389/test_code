@@ -3,11 +3,11 @@ from django.http import JsonResponse, HttpResponse
 from book_collection import models as model_k
 import requests, json
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import viewsets
-from rest_framework import permissions
+# from rest_framework import viewsets
+# from rest_framework import permissions
 from .serializers import BookSerializer
 
-
+# book fetching from openlibrary using search
 def fetch_books(keyword):
 
 	books_response = requests.get('https://openlibrary.org/search.json?q='+keyword)
@@ -15,6 +15,7 @@ def fetch_books(keyword):
 	# print(books_dct)
 	return books_dct
 
+# formating the data according to https://openlibrary.org/books/OL1017798M.json
 def format_books(books_dct):
 
 
@@ -230,7 +231,7 @@ def format_books(books_dct):
 
 	return books_lst
 
-
+# exposing the function to the url system
 def fetch_books_wrap(request):
 
 	books_dct = fetch_books('spacecraft')
@@ -245,7 +246,7 @@ def fetch_books_wrap(request):
 
 	return HttpResponse('books fetched')
 
-
+# writing the books retrieved to the db
 def books2db(books_lst):
 
 	for book_dct in books_lst:
@@ -365,14 +366,12 @@ def books2db(books_lst):
 				book=book_obj,
 			)
 
+# returns all the books in json format
 def get_all_books(request):
 
 	return get_books({})
 
-def get_all_books_auth(request):
-
-	return get_books({})
-
+'''
 class bookviewsets(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -380,7 +379,9 @@ class bookviewsets(viewsets.ModelViewSet):
     queryset = model_k.Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.IsAuthenticated]
+'''
 
+# returns all the books in json format
 def get_books(filtering):
 
 	books_dct = {}
@@ -536,7 +537,7 @@ def get_books(filtering):
 
 	return JsonResponse({'books_lst':books_lst})
 
-# json.loads
+# CRUD examples follow
 
 @csrf_exempt
 def book_create(request):

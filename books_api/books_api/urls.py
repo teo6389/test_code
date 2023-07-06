@@ -22,11 +22,11 @@ from rest_framework.authtoken import views
 from book_collection import views as b_views
 from rest_framework import routers
 
-router = routers.DefaultRouter()
-router.register(r'book', b_views.bookviewsets)
+# router = routers.DefaultRouter()
+# router.register(r'book', b_views.bookviewsets)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    # path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('books/', include('book_collection.urls')),
     path('api-auth/', include('rest_framework.urls')),
